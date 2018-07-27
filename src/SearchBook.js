@@ -1,21 +1,44 @@
 import React , {Component} from 'react'
 import {Link} from 'react-router-dom'
-
+import * as Utils from './Utils'
+import BookComponent from './BookComponent';
 class SearchBook extends Component {
-
+    constructor()
+    {
+        super()
+        this.books = []
+        this.booksFiltered = []
+    }
     state = {
         query: ''
     }
 
 
+    componentDidMount = ()=>
+    {
+        Utils.initData().then(data => {
+           this.books = data;
+        }
+        );
+    }
     handleInput = (evt)=> {
-        console.log(evt.target.value);
+        let query = evt.target.value;
+        if(query === "") 
+            return;
+        /* Filter through both title and author */
+        this.booksFiltered = this.books.filter( 
+            book => book.title.toLowerCase().includes(query.toLowerCase()) 
+            || book.authors.some( author => author.toLowerCase().includes(query.toLowerCase()) ) 
+        )
+       
         this.setState({
             query: evt.target.value
         })
     }
    
     clearQuery = () => {
+        this.booksFiltered = [];
+
         this.setState(
             {
                 query: ''
@@ -38,14 +61,29 @@ class SearchBook extends Component {
                   However, remember that the BooksAPI.search method DOES search by title or author. So, don't worry if
                   you don't find a specific author or title. Every search is limited by search terms.
                 */}
-                <input type="text" value={this.state.query} onChange={this.handleInput} placeholder="Search by title or author"/>
+                <input type="text"  value={this.state.query} onChange={this.handleInput} placeholder="Search by title or author"/>
 
               </div>
               <div className="close-btn" onClick={this.clearQuery}></div>
-            </div>
+            </div>            
+            
+    
+
+            {this.booksFiltered.length > 0 &&
             <div className="search-books-results">
-              <ol className="books-grid"></ol>
+             <h2 style={{ textAlign: 'center'}}>Search Results for {this.state.query}</h2>
+              <ol className="books-grid">
+               { 
+                   this.booksFiltered.map((book,idx) => {
+                       return <BookComponent book={book}
+                        moveOption={false}
+                        key={idx}
+                       />
+                   })
+               }
+              </ol>
             </div>
+            }
           </div>
         )
     }

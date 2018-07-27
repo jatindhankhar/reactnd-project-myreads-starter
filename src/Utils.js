@@ -13,6 +13,7 @@ export const isDataCached = () => {
     let data = getfromCache();
     return (data || data === "");
 }
+
 // Saves data only if not cached
 export const saveData = (data,update=false) => {
       if(update)
@@ -29,9 +30,8 @@ export const fetchandSave = (data) => {
 
 // Miss and cache
 export const initData = () => {
-    let data;
     if(isDataCached())
-        data = getfromCache();
-    fetchandSave().then((d) => data = d );
-    return new Promise((resolve,reject) => resolve(data));
+        return new Promise((resolve,reject) => resolve(getfromCache()));
+    return fetchandSave();
+    //return new Promise((resolve,reject) => resolve(data));
 }

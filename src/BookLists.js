@@ -1,7 +1,7 @@
-import React , {Component} from 'react'
-import {Link} from 'react-router-dom'
+import React  from 'react'
 import * as Utils from './Utils'
-class BookLists extends Component {
+import BookComponent from './BookComponent';
+class BookLists extends React.Component {
   constructor()
   {
     super();
@@ -33,7 +33,10 @@ class BookLists extends Component {
     // Single Render 
     this.setState({
       bookShelves: tempShelf
-    })
+    });
+
+   
+    
    }
 
 
@@ -45,7 +48,7 @@ class BookLists extends Component {
 
     createBookShelves = bookShelves => {
         return Object.keys(bookShelves).map( key => {
-          let bookShelf = bookShelves[key]
+         let bookShelf = bookShelves[key]
            return (
             <div className="bookshelf" key={key} >
             <h2 className="bookshelf-title">{this.bookshelfTitle[key]}</h2>
@@ -64,16 +67,24 @@ class BookLists extends Component {
         let currentShelf = evt.currentTarget.getAttribute("data-key")
         let bookIdx = evt.currentTarget.getAttribute("data-idx")
         // Only allow following types if they are different
-        if(newShelf != currentShelf && bookIdx !== undefined && ((newShelf != "none") || newShelf != "move"))
+        if(newShelf !== currentShelf && (!(newShelf === "none" || newShelf === "move")))
           {
               this.setState( prevState => {
-                // Add to new shelf
-               // debugger;
                  // Update only if there are books in current shelf
-                 if(prevState.bookShelves[currentShelf].length != 0)
-                    {prevState.bookShelves[newShelf].push(prevState.bookShelves[currentShelf][bookIdx])
-                 // Remove from old shelf
-                    prevState.bookShelves[currentShelf].splice(bookIdx,1)
+                 if(prevState.bookShelves[currentShelf].length !== 0)
+                
+                    {
+                      prevState.bookShelves[currentShelf][bookIdx].shelf = newShelf
+
+                      if (prevState.bookShelves[newShelf] === undefined)
+                          prevState.bookShelves[newShelf] = [prevState.bookShelves[currentShelf][bookIdx]];
+                      else
+                          prevState.bookShelves[newShelf].push(prevState.bookShelves[currentShelf][bookIdx]);
+                      prevState.bookShelves[currentShelf].splice(bookIdx,1)
+                     // Persist data, so that user can continue without re-arranging
+                     let updatedData =  [].concat.apply([], Object.values(prevState.bookShelves))
+                     Utils.savetoCache(updatedData)
+
                     return prevState
                   }
               });       
@@ -81,26 +92,13 @@ class BookLists extends Component {
     }
     createBookList = (bookList,shelfType) => {
        return bookList.map((book,idx) => {
-            return (
+            return ( book && 
               <li key={idx}>
-              <div className="book" data-idx={idx} data-key={shelfType} onChange={this.moveBookBetweenShelves}>
-                <div className="book-top">
-                  <div className="book-cover" style={ {width: 128, height: 193, backgroundImage: `url(${book.imageLinks.thumbnail})` }}></div>
-                  <div className="book-shelf-changer">
-                    <select>
-                      <option value="move">Move to...</option>
-                      <option value="currentlyReading">Currently Reading</option>
-                      <option value="wantToRead">Want to Read</option>
-                      <option value="read">Read</option>
-                      <option value="none">None</option>
-                    </select>
-                  </div>
-                </div>
-                <div className="book-title">{book.title}</div>
-                <div className="book-authors">{
-                      book.authors.join(" , ")
-                }</div>
-              </div>
+              <BookComponent idx={idx}
+                  book={book}
+                  shelfType={shelfType}
+                  onChangeListener={this.moveBookBetweenShelves}
+                  />
             </li>
             )})
     }

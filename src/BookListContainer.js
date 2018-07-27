@@ -1,7 +1,6 @@
-import React , {Component} from 'react'
+import React from 'react'
 import {Link} from 'react-router-dom'
 import BookLists from './BookLists';
-import * as Utils from './Utils';
 
 class BookListContainer extends React.Component {
     
