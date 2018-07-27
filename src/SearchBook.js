@@ -22,7 +22,7 @@ class SearchBook extends Component {
         );
     }
     handleInput = (evt)=> {
-        let query = evt.target.value;
+        let query = evt.target.value.trim();
         if(query === "") 
             return;
         /* Filter through both title and author */
@@ -32,7 +32,7 @@ class SearchBook extends Component {
         )
        
         this.setState({
-            query: evt.target.value
+            query: query
         })
     }
    
