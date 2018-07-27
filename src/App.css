@@ -54,7 +54,7 @@ body, .app {
   height: 50px;
   border-radius: 50%;
   background: #2e7d32;
-  background-image: url('./icons/add.svg');
+  background-image: url('./icons/search.svg');
   background-repeat: no-repeat;
   background-position: center;
   background-size: 28px;
@@ -99,6 +99,20 @@ body, .app {
   font-size: 0;
 }
 
+.close-btn {
+  display: block;
+  top: 20px;
+  left: 15px;
+  width: 50px;
+  height: 53px;
+  background: white;
+  background-image: url('./icons/close.svg');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 28px;
+  cursor: pointer;
+  font-size: 0;
+}
 .search-books-results {
   padding: 80px 10px 20px;
 }
