@@ -1,39 +1,52 @@
 import React , {Component} from 'react'
 import {Link} from 'react-router-dom'
-import * as Utils from './Utils'
 import BookComponent from './BookComponent';
+import * as BooksAPI from './BooksAPI';
+import PropTypes from 'prop-types';
+
 class SearchBook extends Component {
     constructor()
     {
         super()
-        this.books = []
         this.booksFiltered = []
     }
     state = {
-        query: ''
+        query: '',
+        searchedBooks: []
     }
 
-
-    componentDidMount = ()=>
+    resetRealTimeQuery()
     {
-        Utils.initData().then(data => {
-           this.books = data;
+        this.setState({searchedBooks: []})
+    }
+    getRealTimeQuery = (query) => {
+        if(query)
+        {
+             BooksAPI.search(query).then(res => { 
+                 if(res.error) 
+                    this.resetRealTimeQuery();
+                else 
+                    this.setState({ searchedBooks: res})
+             });
         }
-        );
+        else
+          this.resetRealTimeQuery();
     }
     handleInput = (evt)=> {
-        let query = evt.target.value.trim();
+        let query = evt.target.value;
+        this.setState({
+            query: query
+        })
         if(query === "") 
             return;
         /* Filter through both title and author */
-        this.booksFiltered = this.books.filter( 
+        this.getRealTimeQuery(query);
+        this.booksFiltered = this.props.books.filter( 
             book => book.title.toLowerCase().includes(query.toLowerCase()) 
             || book.authors.some( author => author.toLowerCase().includes(query.toLowerCase()) ) 
         )
        
-        this.setState({
-            query: query
-        })
+       
     }
    
     clearQuery = () => {
@@ -72,16 +85,40 @@ class SearchBook extends Component {
             {this.booksFiltered.length > 0 &&
             <div className="search-books-results">
              <h2 style={{ textAlign: 'center'}}>Search Results for {this.state.query}</h2>
+            <div className="results">
+            <h2 style={{ textAlign: 'center'}}> From the store: </h2>
+                  <ol className="books-grid">
+                     {
+                         this.state.searchedBooks.length === 0 &&
+                         <i className="fas fa-sync-alt fa-5x fa-spin" style={{ textAlign: 'center'}}> </i>
+                     }
+                     {   (this.state.searchedBooks.length > 0 &&
+                         this.state.searchedBooks.map((book,idx) => {
+                            return <BookComponent book={book}
+                                    moveOption={true}
+                                    key={idx} 
+                                    newBook={true}
+                                    onChangeListener={this.props.addToShelfLogic}
+                                    />
+                         }))
+                     }
+                  </ol>
+            </div>
+            <div className="results">
+            <h2 style={{ textAlign: 'center'}}> From the shelf: </h2>
               <ol className="books-grid">
                { 
                    this.booksFiltered.map((book,idx) => {
                        return <BookComponent book={book}
-                        moveOption={false}
+                        idx={idx}
+                        moveOption={true}
+                        onChangeListener={this.props.moveShelfLogic}
                         key={idx}
                        />
                    })
                }
               </ol>
+              </div>
             </div>
             }
           </div>
@@ -89,5 +126,19 @@ class SearchBook extends Component {
     }
 
 }
+
+SearchBook.defaultProps = {
+    books: [],
+    moveShelfLogic: ()=>{},
+    addToShelfLogic: ()=> {},
+
+}
+
+SearchBook.propTypes = {
+    books: PropTypes.array.isRequired,
+    addToShelfLogic: PropTypes.func.isRequired
+
+}
+
 
 export default SearchBook
