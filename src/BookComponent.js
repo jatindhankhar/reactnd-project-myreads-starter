@@ -23,11 +23,16 @@ class BookComponent extends React.Component {
           <div className="book-shelf-changer">
           
             <select>
-              <option value="move">Move to...</option>
-              <option value="currentlyReading">Currently Reading</option>
-              <option value="wantToRead">Want to Read</option>
-              <option value="read">Read</option>
-              <option value="none">None</option>
+              <option value="move" disabled>Move to...</option>
+              { /* Using  an empty non visible style for hack. 
+                 Since onchange only emits on change and having a disabled option means first enabled option is always selected.
+                 Change is not emitted
+              */}
+              <option value="" style={{display: 'none'}}></option>
+              <option value="currentlyReading" selected={this.props.book.shelf  === "currentlyReading"}>Currently Reading</option>
+              <option value="wantToRead"  selected={this.props.book.shelf  === "wantToRead"}>Want to Read</option>
+              <option value="read"  selected={this.props.book.shelf  === "read"}>Read</option>
+              <option value="none"  selected={this.props.book.shelf  === "none"}>None</option>
             </select>
           
           </div>

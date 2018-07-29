@@ -9,6 +9,8 @@ class SearchBook extends Component {
     {
         super()
         this.booksFiltered = []
+        this.queryinProgress = false
+        this.queryError = false
     }
     state = {
         query: '',
@@ -19,14 +21,31 @@ class SearchBook extends Component {
     {
         this.setState({searchedBooks: []})
     }
+
+    handleSearchResult(searchedBooks){
+            if(searchedBooks)
+            {
+                searchedBooks.map(book => {
+                    const existingBook = this.props.books.find((b) => b.id === book.id)
+                    book.shelf = !!existingBook ? existingBook.shelf : 'none'
+                    return book
+                })     
+            }
+
+        this.setState({searchedBooks})
+    }
     getRealTimeQuery = (query) => {
+        console.log(`GetRealTimeQuery: ${query}`)
         if(query)
         {
              BooksAPI.search(query).then(res => { 
-                 if(res.error) 
-                    this.resetRealTimeQuery();
+                 this.queryinProgress = false
+                 if(res.error) {   
+                        this.queryError = true
+                        this.resetRealTimeQuery();
+                    }
                 else 
-                    this.setState({ searchedBooks: res})
+                  this.handleSearchResult(res);
              });
         }
         else
@@ -34,12 +53,13 @@ class SearchBook extends Component {
     }
     handleInput = (evt)=> {
         let query = evt.target.value;
-        this.setState({
-            query: query
-        })
+        this.setState({query})
+        console.log(`HandleInput: ${query}`)
         if(query === "") 
-            return;
-        /* Filter through both title and author */
+           {   this.clearQuery();
+               return;
+           }
+        this.queryinProgress = true;
         this.getRealTimeQuery(query);
         this.booksFiltered = this.props.books.filter( 
             book => book.title.toLowerCase().includes(query.toLowerCase()) 
@@ -51,7 +71,8 @@ class SearchBook extends Component {
    
     clearQuery = () => {
         this.booksFiltered = [];
-
+        this.queryinProgress = false;
+        this.queryError = false;
         this.setState(
             {
                 query: ''
@@ -81,16 +102,18 @@ class SearchBook extends Component {
             </div>            
             
     
-
-            {this.booksFiltered.length > 0 &&
-            <div className="search-books-results">
+            {this.state.query && 
+            (<div className="search-books-results">
              <h2 style={{ textAlign: 'center'}}>Search Results for {this.state.query}</h2>
             <div className="results">
             <h2 style={{ textAlign: 'center'}}> From the store: </h2>
                   <ol className="books-grid">
                      {
-                         this.state.searchedBooks.length === 0 &&
+                         this.state.searchedBooks.length === 0 && this.queryinProgress &&
                          <i className="fas fa-sync-alt fa-5x fa-spin" style={{ textAlign: 'center'}}> </i>
+                     }
+                     {
+                       this.state.searchedBooks.length === 0 &&  this.queryError &&  <p> There was some error :( </p>
                      }
                      {   (this.state.searchedBooks.length > 0 &&
                          this.state.searchedBooks.map((book,idx) => {
@@ -106,6 +129,7 @@ class SearchBook extends Component {
             </div>
             <div className="results">
             <h2 style={{ textAlign: 'center'}}> From the shelf: </h2>
+              {this.booksFiltered.length > 0 &&(
               <ol className="books-grid">
                { 
                    this.booksFiltered.map((book,idx) => {
@@ -117,10 +141,11 @@ class SearchBook extends Component {
                        />
                    })
                }
-              </ol>
+              </ol>)
+              }
               </div>
-            </div>
-            }
+            </div>)}
+            
           </div>
         )
     }

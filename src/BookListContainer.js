@@ -4,24 +4,22 @@ import BookLists from './BookLists';
 import PropTypes from 'prop-types';
 
 
-class BookListContainer extends React.Component {
-    
-    render() {
+const BookListContainer = (props)=> {
         return ( <div className="list-books">
         <div className="list-books-title">
           <h1>MyReads</h1>
         </div>
-        {this.props.books.length === 0 && <i className="fas fa-sync-alt fa-5x fa-spin" style={{ textAlign: 'center'}}> </i>}
-        <BookLists books={this.props.books}
-          bookShelves={this.props.bookShelves}
-          moveShelfLogic={this.props.moveShelfLogic}
-          addToShelfLogic={this.props.addToShelfLogic}
+        {props.books.length === 0 && <i className="fas fa-sync-alt fa-5x fa-spin" style={{ textAlign: 'center'}}> </i>}
+        <BookLists books={props.books}
+          bookShelves={props.bookShelves}
+          moveShelfLogic={props.moveShelfLogic}
+          addToShelfLogic={props.addToShelfLogic}
           />
         <div className="open-search">
           <Link to="/search">Add a book</Link>
         </div>
       </div>)
-    }
+  
 }
 
 BookListContainer.defaultProps = {

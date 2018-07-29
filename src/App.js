@@ -1,10 +1,11 @@
 import React from 'react'
-import './App.css'
 import {Route,Switch,Redirect} from 'react-router-dom'
 import SearchBook from './SearchBook';
 import BookListContainer from './BookListContainer';
 import * as Utils from './Utils'
 import * as BookAPI from './BooksAPI'
+import './App.css'
+
 class BooksApp extends React.Component {
   state = {
     books: [],
@@ -16,24 +17,24 @@ class BooksApp extends React.Component {
       Utils.initData().then(this.segregateBooks);
   }
 
-  segregateBooks = (data) =>
+  segregateBooks = (books) =>
    {
 
      // Set state
-     this.setState({books: data})
+     this.setState({books})
      // If we trigger setState on each book addition, there would be too many render calls
      // Instead use temp variable and update it once
-     let tempShelf = {};
-      data.forEach(element => {
+     let bookShelves = {};
+      books.forEach(element => {
              // If shelf doesn't exist create one
-             if(!(element.shelf in tempShelf)) 
-                 tempShelf[element.shelf] = [element] // Create bookShelf and Add book to shelf
+             if(!(element.shelf in bookShelves)) 
+                 bookShelves[element.shelf] = [element] // Create bookShelf and Add book to shelf
               else 
-                 tempShelf[element.shelf].push(element);                 
+                 bookShelves[element.shelf].push(element);                 
         });
     // Single Render 
     this.setState({
-      bookShelves: tempShelf
+      bookShelves
     });  
    }
   
